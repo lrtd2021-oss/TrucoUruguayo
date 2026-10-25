@@ -2,6 +2,22 @@
 
 Registro de las ejecuciones reales de las pruebas automáticas. Una prueba solo cuenta como pasada si figura aquí con su ejecución.
 
+## 2026-10-25: cierre de la Fase 3
+
+- **Comando:** `herramientas/pruebas.sh`.
+- **Resultado:** 7 scripts, **64 pruebas, 64 pasadas**, 11.539 comprobaciones, 8,9 s, sin nodos huérfanos.
+- **Nuevo, `test_mesa.gd`:**
+  - clic doble y bloqueo durante la animación (3.2);
+  - botones solo para acciones válidas (3.3);
+  - 8 partidos completos jugados tocando la interfaz (3.4);
+  - guion por asiento y pausa (3.5);
+  - la regla D-15 en el controlador.
+- **Clics reales en ventana:** `herramientas/probar_clics.sh` dio «bien» a 1920×1080, 1366×768 y 1280×720. Con un panel tapando la pantalla, la misma comprobación falló como debía (código 1).
+- **Capturas revisadas:** 1280×720, 1366×768, 1920×1080 y 1920×1200. Problemas encontrados y corregidos:
+  - el panel del registro tapaba al rival de la derecha;
+  - los dorsos aparecían a tamaño completo, porque los contenedores anulan la escala de sus hijos;
+  - la insignia de pieza se pisaba con el número de la esquina.
+
 ## 2026-10-25: cierre de la Fase 2
 
 - **Entorno:** Godot 4.7.2.stable.official.ed1daf0bf (headless), GUT 9.7.1, Windows 11.

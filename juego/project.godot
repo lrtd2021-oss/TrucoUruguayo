@@ -8,6 +8,7 @@ config_version=5
 config/name="Truco Uruguayo"
 config/version="0.1.0"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+run/main_scene="res://mesa/mesa.tscn"
 
 [debug]
 

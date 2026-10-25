@@ -2,6 +2,13 @@
 
 ## [Sin publicar]
 
+### Fase 3: prototipo jugable (2026-10-25)
+
+- Mesa jugable con cartas provisionales: mano propia con insignia de pieza, muestra con sus piezas y el alcahuete, cartas jugadas animadas, dorsos de los rivales, globos de cantos, tanteador con malas y buenas, bazas, valor de la mano y registro de la partida.
+- Controlador de la mesa con fuente de decisión por asiento (persona, IA o guion), pausa y bloqueo de acciones mientras se anima.
+- IA básica provisional que juega de forma legal y razonable.
+- Pruebas de la interfaz (64 en total) y comprobación de clics reales con ventana.
+
 ### Fase 2: motor de reglas (2026-10-25)
 
 - Proyecto de Godot 4.7.2 (`juego/`) con tipado estático obligatorio y GUT 9.7.1 para las pruebas.

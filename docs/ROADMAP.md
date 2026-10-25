@@ -9,7 +9,7 @@ Estados: **pendiente**, **en curso**, **bloqueada** y **completada**. Una tarea 
 | 0 | Reconocimiento del entorno | completada |
 | 1 | Investigación, diseño y planificación | en curso: motor aprobado; reglas, arte y tutorial en revisión |
 | 2 | Motor de reglas y pruebas | completada con el reglamento base (ver nota) |
-| 3 | Prototipo jugable | pendiente |
+| 3 | Prototipo jugable | completada |
 | 4 | IA, señas y comportamiento | pendiente |
 | 5 | Identidad visual, animaciones y audio | pendiente |
 | 6 | Menús, diálogos, tutorial y accesibilidad | pendiente |
@@ -63,13 +63,17 @@ Dependencias: motor aprobado (D-17).
 
 ## Fase 3: prototipo jugable
 
-| # | Tarea | Criterio de aceptación |
-|---|-------|------------------------|
-| 3.1 | Escena de mesa con cartas provisionales (rectángulos con texto) | Se ven la mano propia, la muestra, las cartas jugadas y el tanteador |
-| 3.2 | Controlador de la mesa y cola de eventos animados | Ninguna acción se aplica dos veces, aunque se haga clic varias veces seguidas |
-| 3.3 | Botones creados a partir de las acciones válidas | La interfaz nunca ofrece una acción ilegal |
-| 3.4 | Partida completa contra la IA mínima | Se puede jugar un partido a 30 de principio a fin, sin bloqueos |
-| 3.5 | Fuente de decisión por asiento (humano, IA, guion) y pausa de la mesa | Una mano con rivales guionados se reproduce igual; pausar y reanudar no cambia el resultado de una misma semilla |
+| # | Tarea | Estado | Verificación |
+|---|-------|--------|--------------|
+| 3.1 | Escena de mesa con cartas provisionales (`mesa/mesa.tscn`, `mesa/carta_vista.gd`) | completada | Capturas reales a 1280×720, 1366×768, 1920×1080 y 1920×1200. Se ven la mano propia (con insignia de pieza), la muestra con sus piezas y el alcahuete, las cartas jugadas, los dorsos, el tanteador con malas y buenas, las bazas, el valor de la mano y el registro |
+| 3.2 | Controlador de la mesa (`mesa/controlador_mesa.gd`) y cola de eventos animados | completada | Un clic doble aplica una sola vez; mientras se anima no se aplica nada (pruebas `test_32_*`) |
+| 3.3 | Botones creados a partir de las acciones válidas | completada | Un botón por acción válida, y solo las cartas jugables se pueden tocar (`test_33_*`). Los clics de ratón reales en ventana llegan al motor (`herramientas/probar_clics.sh`); comprobado también que falla si algo tapa la pantalla |
+| 3.4 | Partida completa contra la IA mínima | completada | 8 partidos a 30 jugados tocando la interfaz, sin bloqueos (`test_34_*`); partidas automáticas con ventana |
+| 3.5 | Fuente de decisión por asiento (humano, IA, guion) y pausa de la mesa | completada | El guion se aplica y una acción ilegal del guion se informa; pausar no cambia el resultado de una misma semilla (`test_35_*`) |
+
+**Criterio de fase cumplido:** un partido completo se juega de principio a fin sin errores de estado, acciones ilegales ni bloqueos. Resultados en [RESULTADOS_PRUEBAS.md](RESULTADOS_PRUEBAS.md); capturas en `docs/capturas/`.
+
+**Provisional en esta fase:** las cartas (rectángulos con texto), los colores, la disposición y la IA básica (`ia/ia_basica.gd`), que juega de forma legal pero sin estrategia ni personalidad. Todo se reemplaza en las Fases 4 a 6.
 
 ## Fase 4: IA, señas y comportamiento
 

@@ -4,7 +4,7 @@ Videojuego de truco uruguayo para PC, hecho en Godot. Se juega con muestra, piez
 
 ## Estado
 
-**Fase 2 terminada: motor de reglas implementado y probado** (57 pruebas en verde, incluidos 1000 partidos simulados). Todavía no hay interfaz ni recursos gráficos: eso empieza en la Fase 3. Quedan en revisión algunas opciones del reglamento, la dirección artística y el diseño del tutorial.
+**Fase 3 terminada: prototipo jugable.** Ya se puede jugar un partido completo contra la computadora, con cartas provisionales (rectángulos con texto) y una IA básica. Hay 64 pruebas automáticas en verde. La IA definitiva, las señas, el arte, el sonido y el tutorial llegan en las fases siguientes.
 
 | Documento | Contenido |
 |-----------|-----------|
@@ -32,13 +32,31 @@ docs/          documentación del proyecto
 herramientas/  scripts del proyecto (pruebas; generación de recursos desde la Fase 5)
 juego/         proyecto de Godot
   reglas/      motor de reglas: cartas, muestra, tantos, mano, partido, vista
-  ia/          inteligencia artificial (por ahora, la aleatoria para pruebas)
+  ia/          inteligencia artificial (por ahora, la básica provisional y la aleatoria para pruebas)
+  mesa/        escena de la mesa, controlador y cartas provisionales
   pruebas/     pruebas automáticas (GUT)
 ```
 
 ## Compilar y ejecutar
 
-Todavía no hay nada que jugar: el proyecto contiene solo el motor de reglas. Para abrirlo, ejecutá Godot 4.7.2 e importá `juego/project.godot`.
+Para jugar, abrí `juego/project.godot` con Godot 4.7.2 y apretá F5, o ejecutá desde la carpeta del repositorio:
+
+```bash
+~/Herramientas/Godot/4.7.2/Godot_v4.7.2-stable_win64.exe --path juego
+```
+
+**Controles del prototipo:**
+
+- clic en una carta para jugarla, o las teclas 1, 2 y 3;
+- clic en los botones de la derecha para cantar o responder;
+- Enter para pasar a la mano siguiente;
+- P o Esc para pausar.
+
+Para comprobar que los clics llegan con la ventana real:
+
+```bash
+herramientas/probar_clics.sh
+```
 
 Para ejecutar las pruebas sin abrir el editor:
 

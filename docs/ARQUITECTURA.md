@@ -1,6 +1,6 @@
 # Arquitectura
 
-Estado: **Godot 4.7.2 (D-17). El motor de reglas (capas 1 a 5) y la IA aleatoria de prueba están implementados y probados (Fase 2).** Las capas 6 a 11 siguen siendo diseño.
+Estado: **Godot 4.7.2 (D-17).** Implementado y probado: el motor de reglas (capas 1 a 5, Fase 2), el control de la mesa (capa 8) y una presentación provisional (capa 9, Fase 3), con una IA básica de prueba. Las capas 6 (IA definitiva), 7, 10 y 11 siguen siendo diseño.
 
 Las clases y funciones de Godot citadas aquí salen de la documentación general del motor. **Antes de usar cada una se verifica** contra la referencia de la versión instalada, que se exporta con `godot --doctool` (tarea 2.1). Si algo no existe o cambió de nombre en 4.7.2, se corrige este documento.
 
@@ -179,7 +179,8 @@ Los cálculos de tantos y de jerarquía de la IA llaman a las mismas funciones d
   Comprobado en la tarea 2.1: devuelve 0 si todo pasa y 1 si alguna prueba falla. Acepta opciones de GUT, por ejemplo `-gselect=test_cantos`.
 - **Simulación masiva:** una prueba juega 1000 partidos con decisiones al azar (`IaAleatoria`) y comprueba que terminan, que no hubo acciones rechazadas, que las cartas se conservan y que los puntos suman bien (R-67). Además exige haber pasado al menos una vez por cada situación importante (cada canto y respuesta, pardas, anulación del envido, final por tantos), para que «sin bloqueos» signifique algo.
 - **Limitación conocida:** en modo headless, `--check-only` muestra los errores (incluidas las declaraciones sin tipo) pero no las advertencias comunes, como una variable sin usar. Esas solo se ven en el editor.
-- **Verificación visual:** un argumento de línea de comandos propio, leído con `OS.get_cmdline_user_args()`, carga una escena o un escenario y guarda una captura de la ventana en `user://capturas/`. Sirve para revisar cartas, señas y diseño en cada resolución sin jugar a mano. Requiere ventana, no funciona en headless.
+- **Verificación visual:** la mesa acepta argumentos propios después de `--`, leídos con `OS.get_cmdline_user_args()`: `--semilla`, `--auto`, `--velocidad`, `--resolucion`, `--captura` y `--capturar-tras`. Guarda una captura PNG de la ventana y cierra el juego. Requiere ventana: no funciona en headless.
+- **Clics reales de punta a punta:** `herramientas/probar_clics.sh` abre el juego con `--probar-clics`, envía clics de ratón con `Input.parse_input_event` sobre una carta y un botón, y sale con 0 si llegaron al motor. Hace falta porque en headless la ventana mide 64×64 y el panel de GUT queda encima de todo, así que ahí los clics sintéticos no son representativos. Por eso las pruebas GUT de la interfaz emiten las señales directamente.
 - **Verificación de la API:** la referencia de clases de 4.7.2, exportada con `godot --doctool`, se guarda fuera del repositorio y se consulta antes de usar una clase o función nueva.
 - **Regla de honestidad:** una prueba solo cuenta como pasada si se ejecutó en Godot y su resultado quedó registrado.
 

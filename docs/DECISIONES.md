@@ -26,6 +26,8 @@ Cada decisión tiene un estado: **adoptada**, **propuesta** (espera revisión) o
 | D-19 | 2026-10-25 | Las apuestas de flor las responde quien tiene flor | adoptada |
 | D-20 | 2026-10-25 | La flor se anota al cerrar la primera baza o al terminar la mano | adoptada |
 | D-21 | 2026-10-25 | GUT 9.7.1 incluido en el repositorio (`juego/addons/gut/`) | adoptada |
+| D-22 | 2026-10-25 | IA básica provisional para el prototipo, reemplazable en la Fase 4 | adoptada |
+| D-23 | 2026-10-25 | Interfaz del prototipo construida por código, no en el editor | adoptada |
 
 ## Detalle
 
@@ -68,5 +70,9 @@ Cada decisión tiene un estado: **adoptada**, **propuesta** (espera revisión) o
 **D-20. Momento de anotar la flor.** Para comparar flores hay que esperar a que todos hayan tenido su turno de declarar, así que la flor se anota al cerrar la primera baza (o antes, si la mano termina). Si la mano termina antes de que un jugador llegue a su turno (por ejemplo, un truco no querido), su flor no llega a declararse y no cuenta. Queda registrado como comportamiento a confirmar junto con las demás reglas de la flor.
 
 **D-21. GUT en el repositorio.** Las pruebas tienen que poder ejecutarse con solo clonar el repositorio y tener Godot. GUT es MIT y su licencia viaja en `addons/gut/LICENSE.md`.
+
+**D-22. IA básica provisional.** El prototipo necesitaba rivales que jugaran razonablemente para poder probar la mesa: la IA aleatoria se iba al mazo en la mitad de las manos. `IaBasica` usa solo su vista, declara la flor, quiere el envido según su tanto y mata cuando puede. No tiene estrategia ni personalidad; eso corresponde a la Fase 4, que la reemplaza sin tocar el controlador.
+
+**D-23. Interfaz por código en el prototipo.** Mientras las cartas y la disposición son provisionales, construir la mesa por código permite cambiarla y verificarla con capturas sin depender del editor. Cuando llegue la dirección artística definitiva (Fase 5), las piezas estables (carta, retrato, globo, tanteador) pasan a escenas `.tscn` con un tema global.
 
 **D-16. Ir al mazo por pareja.** F2 exige que los dos compañeros abandonen. Para simplificar, en la pareja rival decide el jugador de turno. En la pareja de la persona solo decide la persona, en coherencia con D-15: el compañero IA nunca se va al mazo por su cuenta. La opción individual de «pasar» (F6) queda como variante futura.
