@@ -14,6 +14,14 @@ var baza: int
 var fase: int
 var puntos: Array[int] = []
 var truco_aceptado: int
+## Quién abrió la baza en curso.
+var abre: int
+## Secuencia del envido que espera respuesta (tipos de Accion), si hay uno.
+var secuencia_envido: Array[int] = []
+## Lo que vale ahora una falta envido o una contraflor al resto.
+var valor_falta: int
+## Señas que este jugador hizo o vio (nunca las demás).
+var senas: Array[Dictionary] = []
 ## Canto que espera respuesta (Mano.TipoCanto) y su nivel, o -1 si no hay.
 var canto_pendiente := -1
 var nivel_canto := -1
@@ -26,7 +34,7 @@ var mostradas: Dictionary = {}
 var acciones_validas: Array[Accion] = []
 
 
-static func para(m: Mano, j: int) -> Vista:
+static func para(m: Mano, j: int, registro: RegistroSenas = null) -> Vista:
 	var v := Vista.new()
 	v.jugador = j
 	v.muestra = m.muestra.carta
@@ -39,10 +47,16 @@ static func para(m: Mano, j: int) -> Vista:
 	v.fase = m.fase
 	v.puntos = m.puntos.duplicate()
 	v.truco_aceptado = m.truco_aceptado
+	v.abre = m.abre
+	v.valor_falta = m.reglamento.valor_falta(m.puntos)
+	if registro:
+		v.senas = registro.conocidas_por(j)
 	if m.fase == Mano.Fase.CANTO:
 		var c: Mano.Canto = m.cantos.back()
 		v.canto_pendiente = c.tipo
 		v.nivel_canto = c.nivel
+		if c.tipo == Mano.TipoCanto.ENVIDO:
+			v.secuencia_envido = m.secuencia_envido.duplicate()
 	v.resultados = m.resultados.duplicate()
 	v.historial = m.historial.duplicate(true)
 	if m.fase == Mano.Fase.TERMINADA and not m.historial.is_empty():

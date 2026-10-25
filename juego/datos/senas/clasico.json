@@ -1,0 +1,19 @@
+{
+  "id": "clasico",
+  "nombre": "Clásico uruguayo",
+  "fuente": "docs/REGLAS_TRUCO_URUGUAYO.md, punto 11.1",
+  "senas": [
+    {"id": "cejas", "gesto": "levanta las cejas", "significa": "el 2 de la muestra", "cartas": {"pieza": 1}},
+    {"id": "beso", "gesto": "tira un beso", "significa": "el 4 de la muestra", "cartas": {"pieza": 2}},
+    {"id": "nariz", "gesto": "arruga la nariz", "significa": "el 5 de la muestra", "cartas": {"pieza": 3}},
+    {"id": "guino_derecho", "gesto": "guiña el ojo derecho", "significa": "el perico, 11 de la muestra", "cartas": {"pieza": 4}},
+    {"id": "guino_izquierdo", "gesto": "guiña el ojo izquierdo", "significa": "la perica, 10 de la muestra", "cartas": {"pieza": 5}},
+    {"id": "mueca_derecha", "gesto": "hace una mueca hacia la derecha", "significa": "el 1 de espadas o el 1 de bastos", "cartas": {"lista": ["1E", "1B"]}},
+    {"id": "mueca_izquierda", "gesto": "hace una mueca hacia la izquierda", "significa": "el 7 de espadas o el 7 de oros", "cartas": {"lista": ["7E", "7O"]}},
+    {"id": "labio", "gesto": "se muerde el labio de abajo", "significa": "un 3", "cartas": {"numero": 3}},
+    {"id": "boca", "gesto": "abre apenas la boca", "significa": "un 2 que no es pieza", "cartas": {"numero": 2}},
+    {"id": "lengua", "gesto": "asoma la punta de la lengua", "significa": "el 1 de copas o el 1 de oros", "cartas": {"lista": ["1C", "1O"]}},
+    {"id": "ojos_cerrados", "gesto": "cierra los dos ojos", "significa": "nada que valga", "cartas": {"nada": true}},
+    {"id": "cachetes", "gesto": "infla los cachetes", "significa": "flor", "cartas": {"flor": true}}
+  ]
+}

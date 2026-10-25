@@ -1,6 +1,6 @@
 # Arquitectura
 
-Estado: **Godot 4.7.2 (D-17).** Implementado y probado: el motor de reglas (capas 1 a 5, Fase 2), el control de la mesa (capa 8) y una presentación provisional (capa 9, Fase 3), con una IA básica de prueba. Las capas 6 (IA definitiva), 7, 10 y 11 siguen siendo diseño.
+Estado: **Godot 4.7.2 (D-17).** Implementado y probado: el motor de reglas (capas 1 a 5, Fase 2), el control de la mesa (capa 8) y una presentación provisional (capa 9, Fase 3), la IA por muestreo con personalidades y el sistema de señas (capas 6 y 7, Fase 4). Las capas 10 y 11 siguen siendo diseño.
 
 Las clases y funciones de Godot citadas aquí salen de la documentación general del motor. **Antes de usar cada una se verifica** contra la referencia de la versión instalada, que se exporta con `godot --doctool` (tarea 2.1). Si algo no existe o cambió de nombre en 4.7.2, se corrige este documento.
 
@@ -52,8 +52,8 @@ La regla principal: **la lógica no dibuja y la presentación no decide.** Las c
 | 3 | Reglas de la mano | `reglas/reglamento.gd`, `reglas/mano.gd`, `reglas/accion.gd`, `reglas/escenario.gd` | Estado de la mano, acciones válidas, transiciones y eventos | 1, 2 |
 | 4 | Partido | `reglas/partido.gd` | Tanteador, malas y buenas, falta, victoria, rotación del reparto | 3 |
 | 5 | Información por jugador | `reglas/vista.gd` | Filtra el estado a lo que un jugador puede saber | 3, 4 |
-| 6 | IA | `ia/ia_aleatoria.gd` (Fase 2, solo para pruebas); `ia/ia.gd`, `ia/perfil_ia.gd` (Fase 4) | Elige una acción a partir de una vista | 1, 2, 5 |
-| 7 | Señas | `senas/senas.gd` | Perfiles, emisión, observación e interpretación | 1, 5 |
+| 6 | IA | `ia/ia_muestreo.gd`, `ia/muestreador.gd`, `ia/simulador.gd`, `ia/perfil_ia.gd`, `ia/asistente.gd`; `ia/ia_aleatoria.gd` e `ia/ia_basica.gd` como rivales de referencia para pruebas y mediciones | Elige una acción a partir de una vista | 1, 2, 5 |
+| 7 | Señas | `senas/perfil_senas.gd`, `senas/registro_senas.gd`, `datos/senas/*.json` | Perfiles, emisión, observación e interpretación | 1, 5 |
 | 8 | Control de la mesa | `mesa/mesa.tscn` + `mesa/controlador_mesa.gd` | Pide acciones (a la persona, a la IA o a un guion), las aplica y emite los eventos como señales | 3–7 |
 | 9 | Presentación | `mesa/`, `ui/` (escenas `Carta`, `Retrato`, `Globo`, `Tanteador`…) | Anima los eventos, dibuja la mesa y la interfaz y captura la entrada | 8 |
 | 10 | Audio y diálogos | `sistema/audio.gd`, `mesa/dialogos.gd` | Reproduce sonidos y elige líneas según los eventos | 8 |
@@ -140,13 +140,25 @@ Transiciones automáticas dentro de `aplicar`, que quedan registradas como event
 4. **Dificultad:** cambia la cantidad de muestras, la memoria, la precisión al leer señas y lo «humano» de los errores. **Nunca cambia la información disponible.**
 5. **Fluidez:** el muestreo puede correr en un hilo del `WorkerThreadPool` para no trabar la interfaz. Se activa solo si las mediciones de la Fase 4 lo justifican. Si GDScript no alcanzara el presupuesto de tiempo en dificultad alta, solo el núcleo del muestreo pasaría a C# o a una extensión, sin tocar el resto.
 
-Los cálculos de tantos y de jerarquía de la IA llaman a las mismas funciones de las capas 1 y 2. La IA no tiene su propia versión del envido.
+Los cálculos de tantos y de jerarquía de la IA llaman a las mismas funciones de las capas 1 y 2. La IA no tiene su propia versión del envido. Para eso `Mano` expone como estáticas la resolución de una baza, de la mano por bazas y de una comparación de tantos, y el valor de una secuencia de envido.
+
+**Implementación (Fase 4):**
+
+- `Muestreador` arma hipótesis de cartas ajenas que respetan:
+  - las cartas vistas;
+  - los tantos y las flores declarados;
+  - quién jugó sin cantar flor;
+  - las señas vistas;
+  - como restricciones blandas, lo que sugieren los cantos ajenos (quien canta envido suele tener tanto; quien sube el truco, cartas fuertes).
+- `Simulador` juega el resto de la mano sobre cada hipótesis con una política simple, usando las reglas estáticas de `Mano`.
+- `IaMuestreo` compara lo que gana y lo que arriesga con esas estimaciones, ajustado por la personalidad.
+- La dificultad cambia la cantidad de hipótesis (6, 16 o 40), si usa inferencias y la tasa de errores humanos.
 
 ## 7. Señas
 
-- **Perfil de señas:** archivo JSON en `datos/senas/` que asocia cada seña con un conjunto de cartas descripto por reglas (por ejemplo, «pieza de orden 1», «1E o 1B», «cualquier 3») y con su animación en el retrato (capas y duración). El perfil inicial es «clásico uruguayo» (reglamento, punto 11.1). Al cargarlo se valida que no haya dos señas que se superpongan.
+- **Perfil de señas:** archivo JSON en `datos/senas/` (`PerfilSenas`) que asocia cada seña con un conjunto de cartas descripto por reglas (por ejemplo, «pieza de orden 1», «1E o 1B», «cualquier 3»). La animación en el retrato (capas y duración) se agregará en la Fase 5. El perfil inicial es «clásico uruguayo» (reglamento, punto 11.1). Al cargarlo se valida que no haya dos señas que se superpongan.
 - **Emisión:** un jugador puede hacer una seña en su turno, o al comienzo de la mano mientras todos miran sus cartas. La seña genera un evento que el retrato del emisor anima. Cada retrato indica además hacia dónde mira su personaje.
-- **Observación:** cada jugador que **está mirando** al emisor en ese momento ve la seña. El compañero la ve casi siempre. Un rival la ve según su atención, el disimulo del emisor y si estaba mirando. La persona humana ve las señas que se reproducen en pantalla, **incluidas las de los rivales entre sí**, si está atenta. Es la misma regla para todos.
+- **Observación (implementada en la Fase 4, D-24):** el compañero ve siempre la seña. Cada rival la ve con probabilidad igual a su atención por (1 − disimulo de quien la hace). La persona usa la misma regla, con atención y disimulo medios. `RegistroSenas` guarda quién vio cada seña, y la `Vista` de cada jugador incluye solo las que hizo o vio. La mecánica de mirada en pantalla, en la que la persona ve las señas en los retratos si está atenta, se sumará con los retratos de la Fase 5.
 - **Interpretación:** la IA traduce cada seña observada a un conjunto de cartas posibles y la usa como restricción en el muestreo. Puede equivocarse si su perfil de dificultad lo indica.
 - **Sin canal secreto:** el compañero IA solo informa a la persona con señas visibles en pantalla, sujetas a las mismas reglas de observación que cualquier otra. El diálogo nunca contiene información privada.
 

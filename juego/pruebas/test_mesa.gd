@@ -70,7 +70,8 @@ func test_33_los_botones_salen_de_las_acciones_validas() -> void:
 			continue
 		var validas := m.controlador.mano.acciones_validas(0)
 		var cartas_validas := validas.filter(func(a: Accion) -> bool: return a.tipo == Accion.Tipo.JUGAR_CARTA)
-		assert_eq(m._acciones.get_child_count(), validas.size() - cartas_validas.size(), "un botón por acción que no es carta")
+		assert_eq(_botones_de_accion(m).size(), validas.size() - cartas_validas.size(), "un botón por acción que no es carta")
+		assert_not_null(m._acciones.get_node_or_null("BotonSenas"), "y el botón de señas")
 		var seleccionables := 0
 		for carta: CartaVista in m._mano_propia.get_children():
 			if carta.seleccionable:
@@ -114,10 +115,14 @@ func _tocar_algo(m: Mesa) -> void:
 		if carta.seleccionable:
 			carta.elegida.emit(carta.carta)
 			return
-	var botones := m._acciones.get_children()
+	var botones := _botones_de_accion(m)
 	assert_false(botones.is_empty(), "si le toca a la persona, hay algo para tocar")
 	if not botones.is_empty():
 		(botones[0] as Button).pressed.emit()
+
+
+func _botones_de_accion(m: Mesa) -> Array[Node]:
+	return m._acciones.get_children().filter(func(n: Node) -> bool: return n.name != "BotonSenas")
 
 
 func test_35_guion_por_asiento() -> void:

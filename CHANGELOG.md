@@ -2,6 +2,15 @@
 
 ## [Sin publicar]
 
+### Fase 4: IA, señas y comportamiento (2026-10-25)
+
+- IA por muestreo: estima sus chances con hipótesis de las cartas ajenas que respetan solo lo que sabe (cartas vistas, tantos y flores declarados, señas vistas y lo que sugieren los cantos).
+- Personalidades (Tito, Marta, Cacho, Rosario, Washa) y tres dificultades.
+- Señas: perfil clásico uruguayo en datos, observación igual para todos, lectura de señas por la IA y menú «Hacer una seña…» para la persona.
+- Asistente de sugerencias que solo usa la información de la persona.
+- Medición de fuerza: 86,2 % contra la IA aleatoria en 1000 partidos.
+- El script de pruebas ahora falla si un archivo de pruebas no compila.
+
 ### Fase 3: prototipo jugable (2026-10-25)
 
 - Mesa jugable con cartas provisionales: mano propia con insignia de pieza, muestra con sus piezas y el alcahuete, cartas jugadas animadas, dorsos de los rivales, globos de cantos, tanteador con malas y buenas, bazas, valor de la mano y registro de la partida.

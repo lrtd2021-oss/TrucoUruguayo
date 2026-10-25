@@ -46,6 +46,7 @@ var _aviso := PanelContainer.new()
 var _aviso_texto := Label.new()
 var _aviso_boton := Button.new()
 var _pausa := ColorRect.new()
+var _menu_senas := PopupMenu.new()
 
 var _cola: Array[Dictionary] = []
 var _procesando := false
@@ -62,6 +63,7 @@ func _ready() -> void:
 	controlador.esperar_presentacion = true
 	controlador.eventos_aplicados.connect(_al_recibir_eventos)
 	controlador.espera_humano.connect(func(_j: int) -> void: _refrescar())
+	controlador.sena_vista.connect(_al_ver_sena)
 	if _args.has("auto"):
 		controlador.fuentes[ASIENTO_PERSONA] = ControladorMesa.Fuente.IA
 	if iniciar_al_cargar:
@@ -167,6 +169,10 @@ func _construir() -> void:
 	caja_aviso.add_child(_aviso_boton)
 	_aviso.visible = false
 
+	add_child(_menu_senas)
+	_menu_senas.add_theme_font_size_override("font_size", 22)
+	_menu_senas.id_pressed.connect(_al_elegir_sena)
+
 	add_child(_pausa)
 	_pausa.color = Color(0, 0, 0, 0.6)
 	_pausa.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -242,7 +248,7 @@ func _mostrar(e: Dictionary) -> void:
 			_limpiar_mesa()
 		"canto":
 			_ultimo_canto = e.canto
-			await _decir(e.jugador, "¡%s!" % _mayuscula(e.canto))
+			await _decir(e.jugador, "¡%s!" % Textos.mayuscula(e.canto))
 		"flor":
 			_ultimo_canto = "flor"
 			await _decir(e.jugador, "¡Flor!")
@@ -266,6 +272,37 @@ func _mostrar(e: Dictionary) -> void:
 			await _esperar(0.4)
 		"fin_mano":
 			_fin_de_mano(e)
+		"sena_vista":
+			await _mostrar_sena(e.sena)
+
+
+## Las señas no son eventos del motor: el controlador avisa solo las que la
+## persona hizo o vio, y se muestran en la misma cola que el resto.
+func _al_ver_sena(s: Dictionary) -> void:
+	_al_recibir_eventos([{"tipo": "sena_vista", "sena": s}] as Array[Dictionary])
+
+
+func _mostrar_sena(s: Dictionary) -> void:
+	var emisor: int = s.emisor
+	var datos := controlador.perfil_senas.sena(s.sena)
+	var gesto: String = datos.gesto
+	var texto := ""
+	if emisor == ASIENTO_PERSONA:
+		texto = "Le hacés una seña a %s: %s (%s)." % [NOMBRES[2], gesto, datos.significa]
+	elif Mano.equipo(emisor) == Mano.equipo(ASIENTO_PERSONA):
+		texto = "[b]%s te hace una seña:[/b] %s (%s)." % [NOMBRES[emisor], gesto, datos.significa]
+	else:
+		var companero := NOMBRES[(emisor + 2) % Mano.JUGADORES]
+		texto = "Viste a %s hacerle una seña a %s: %s (%s)." % [NOMBRES[emisor], companero, gesto, datos.significa]
+	_anotar_registro("[i]%s[/i]" % texto)
+	var globo := _globos[emisor]
+	globo.text = "(%s)" % gesto
+	globo.modulate.a = 1.0
+	if velocidad > 0.0:
+		var t := create_tween()
+		t.tween_interval(1.6 / velocidad)
+		t.tween_property(globo, "modulate:a", 0.0, 0.4 / velocidad)
+	await _esperar(0.5)
 
 
 func _preparar_mano(e: Dictionary) -> void:
@@ -426,11 +463,6 @@ func _anotar_registro(texto: String) -> void:
 	_registro.append_text(texto + "\n")
 
 
-## Primera letra en mayúscula y el resto igual («Real envido», no «Real Envido»).
-static func _mayuscula(texto: String) -> String:
-	return texto.left(1).to_upper() + texto.substr(1)
-
-
 static func _vaciar(nodo: Node) -> void:
 	for hijo: Node in nodo.get_children():
 		nodo.remove_child(hijo)
@@ -451,6 +483,13 @@ func _refrescar() -> void:
 	if _procesando or not controlador.esperando_humano():
 		return
 	var v := Vista.para(controlador.mano, ASIENTO_PERSONA)
+	var boton_senas := Button.new()
+	boton_senas.name = "BotonSenas"
+	boton_senas.text = "Hacer una seña… (S)"
+	boton_senas.custom_minimum_size = Vector2(300, 44)
+	boton_senas.add_theme_font_size_override("font_size", 20)
+	boton_senas.pressed.connect(_abrir_menu_senas)
+	_acciones.add_child(boton_senas)
 	for a: Accion in v.acciones_validas:
 		if a.tipo == Accion.Tipo.JUGAR_CARTA:
 			for carta: CartaVista in _mano_propia.get_children():
@@ -458,7 +497,7 @@ func _refrescar() -> void:
 					carta.seleccionable = true
 		else:
 			var boton := Button.new()
-			boton.text = _texto_accion(a, v)
+			boton.text = Textos.accion(a, v)
 			boton.custom_minimum_size = Vector2(300, 52)
 			boton.add_theme_font_size_override("font_size", 22)
 			boton.pressed.connect(_pedir.bind(a))
@@ -477,35 +516,22 @@ func _pedir(a: Accion) -> void:
 		_refrescar()
 
 
+func _abrir_menu_senas() -> void:
+	if not controlador.esperando_humano():
+		return
+	_menu_senas.clear()
+	var senas := controlador.perfil_senas.senas
+	for i: int in senas.size():
+		_menu_senas.add_item("%s (%s)" % [Textos.mayuscula(senas[i].gesto), senas[i].significa], i)
+	_menu_senas.popup_centered()
+
+
+func _al_elegir_sena(i: int) -> void:
+	controlador.hacer_sena(controlador.perfil_senas.senas[i].id)
+
+
 func _al_elegir_carta(c: int) -> void:
 	_pedir(Accion.new(Accion.Tipo.JUGAR_CARTA, ASIENTO_PERSONA, c))
-
-
-func _texto_accion(a: Accion, v: Vista) -> String:
-	var flor := v.canto_pendiente == Mano.TipoCanto.FLOR
-	match a.tipo:
-		Accion.Tipo.TRUCO:
-			var nivel := v.nivel_canto + 1 if v.canto_pendiente == Mano.TipoCanto.TRUCO else v.truco_aceptado + 1
-			return _mayuscula(Mano.NOMBRE_TRUCO[nivel])
-		Accion.Tipo.QUIERO:
-			return "Con flor quiero" if flor else "Quiero"
-		Accion.Tipo.NO_QUIERO:
-			return "Con flor me achico" if flor else "No quiero"
-		Accion.Tipo.CANTAR_FLOR:
-			return "Flor"
-		Accion.Tipo.CONTRAFLOR_AL_RESTO:
-			return "Contraflor al resto"
-		Accion.Tipo.CON_FLOR_ME_ACHICO:
-			return "Con flor me achico"
-		Accion.Tipo.ENVIDO:
-			return "Envido"
-		Accion.Tipo.REAL_ENVIDO:
-			return "Real envido"
-		Accion.Tipo.FALTA_ENVIDO:
-			return "Falta envido"
-		Accion.Tipo.IR_AL_MAZO:
-			return "Irse al mazo"
-	return str(a)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -519,6 +545,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_refrescar()
 		KEY_ENTER, KEY_KP_ENTER:
 			_al_cerrar_aviso()
+		KEY_S:
+			_abrir_menu_senas()
 		KEY_1, KEY_2, KEY_3:
 			var i := int(tecla.keycode - KEY_1)
 			var cartas := _mano_propia.get_children()
@@ -561,8 +589,8 @@ func _probar_clics() -> void:
 	await _clic_real(carta.get_global_rect().get_center())
 	if controlador.mano.cartas_de(ASIENTO_PERSONA).size() != antes - 1:
 		fallos.append("el clic en la carta no la jugó")
-	await _hasta(func() -> bool: return controlador.esperando_humano() and _acciones.get_child_count() > 0)
-	var boton: Button = _acciones.get_child(0)
+	await _hasta(func() -> bool: return controlador.esperando_humano() and _acciones.get_child_count() > 1)
+	var boton: Button = _acciones.get_child(1)  # el 0 es «Hacer una seña…»
 	var acciones := controlador.mano.acciones.size()
 	await _clic_real(boton.get_global_rect().get_center())
 	if controlador.mano.acciones.size() != acciones + 1:

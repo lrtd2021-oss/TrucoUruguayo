@@ -23,7 +23,7 @@ Cinco personajes, de los que se eligen tres por partida: el compañero y dos riv
 | **Rosario**, 34, enfermera | Reservada | Habla muy poco: «Quiero.», «Son buenas.», «Ta.» | Sólida y difícil de leer. Pocas señas, pero muy precisas. | Pelo atado, mirada fija |
 | **Washington, «Washa»**, 24, estudiante | El que festeja de más | Eufórico, exagerado, pura emoción. | Impulsivo, muy expresivo. Su cara a veces lo delata (mayor probabilidad de que los rivales vean sus señas). | Gorro de lana, sonrisa grande |
 
-La personalidad cambia decisiones dentro de lo legal (cuándo cantar, cuánto arriesgar, cuánto disimular) y nunca la información disponible.
+La personalidad cambia decisiones dentro de lo legal (cuándo cantar, cuánto arriesgar, cuánto disimular) y nunca la información disponible. Los valores de cada personaje (agresividad, farol, prudencia, atención y disimulo) están en `juego/ia/perfil_ia.gd`.
 
 ## Líneas de muestra
 

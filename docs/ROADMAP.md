@@ -10,7 +10,7 @@ Estados: **pendiente**, **en curso**, **bloqueada** y **completada**. Una tarea 
 | 1 | Investigación, diseño y planificación | en curso: motor aprobado; reglas, arte y tutorial en revisión |
 | 2 | Motor de reglas y pruebas | completada con el reglamento base (ver nota) |
 | 3 | Prototipo jugable | completada |
-| 4 | IA, señas y comportamiento | pendiente |
+| 4 | IA, señas y comportamiento | completada (con mejoras de la IA pendientes) |
 | 5 | Identidad visual, animaciones y audio | pendiente |
 | 6 | Menús, diálogos, tutorial y accesibilidad | pendiente |
 | 7 | Pruebas finales y preparación del lanzamiento | pendiente |
@@ -77,14 +77,22 @@ Dependencias: motor aprobado (D-17).
 
 ## Fase 4: IA, señas y comportamiento
 
-| # | Tarea | Criterio de aceptación |
-|---|-------|------------------------|
-| 4.1 | IA por muestreo con información legítima | Le gana a la IA aleatoria en más del 80 % de 1000 partidas y R-65 sigue pasando |
-| 4.2 | Perfiles de personalidad y tres dificultades | Diferencias medibles en frecuencia de cantos y faroles entre perfiles |
-| 4.3 | Perfil de señas y validación | R-68 pasa |
-| 4.4 | Emisión, observación (mirada) e interpretación de señas | El compañero IA usa las señas observadas y los rivales solo las que vieron |
-| 4.5 | Señas de la persona (menú de señas) | El compañero IA cambia sus decisiones según la seña recibida |
-| 4.6 | Asistente de sugerencias a partir de la vista de la persona | T-10 (invariancia ante cartas ocultas) pasa |
+| # | Tarea | Estado | Verificación |
+|---|-------|--------|--------------|
+| 4.1 | IA por muestreo con información legítima (`ia/muestreador.gd`, `ia/simulador.gd`, `ia/ia_muestreo.gd`) | completada | Le gana a la IA aleatoria 862 de 1000 partidos (86,2 %) con repartos espejados (`herramientas/medir_ia.sh`). Decide igual si cambian las cartas ocultas (R-65 para la IA). Decisiones en 6 ms de media y 45 ms como máximo |
+| 4.2 | Personalidades (Tito, Marta, Cacho, Rosario, Washa) y tres dificultades (`ia/perfil_ia.gd`) | completada | En 30 partidos, Tito y Cacho gritan más truco y farolean más que Marta y Rosario (`test_42_*`) |
+| 4.3 | Perfil de señas en datos (`datos/senas/clasico.json`) y validación | completada | R-68: sin conflictos con ninguna de las 40 muestras; cada seña significa lo documentado; el alcahuete usa la seña de la pieza que reemplaza |
+| 4.4 | Emisión, observación e interpretación de señas | completada | El compañero ve siempre; un rival, según su atención y el disimulo de quien la hace (frecuencia medida); una seña no vista no cambia nada de lo que decide un rival (`test_44_*`) |
+| 4.5 | Señas de la persona (menú «Hacer una seña…») | completada | Con «tengo el 2 de la muestra» el compañero estima 1,00 y grita truco; con «nada que valga» estima 0,13 y juega sin gritar (`test_45_*`) |
+| 4.6 | Asistente de sugerencias (`ia/asistente.gd`) | completada | T-10: misma sugerencia con la misma información pública y distintas cartas ocultas |
+
+**Criterio de fase cumplido:** los rivales completan partidas, toman siempre decisiones legales y no usan información oculta. Resultados en [RESULTADOS_PRUEBAS.md](RESULTADOS_PRUEBAS.md); capturas en `docs/capturas/`.
+
+**Pendiente, para una iteración posterior de la IA:**
+
+- **Fuerza:** contra la IA básica de la Fase 3 gana el 64,5 %. Es una IA de nivel intermedio: pierde puntos al querer retrucos de rivales fuertes y la política de los simulacros es simple.
+- **Elección de dificultad:** la dificultad se elige en el código; el menú para elegirla es de la Fase 6.
+- **Observación de señas:** por ahora es probabilística para todos. La mecánica de mirada en pantalla, en la que la persona tiene que estar atenta a los retratos, llega con los retratos de la Fase 5 (D-24).
 
 ## Fase 5: identidad visual, animaciones y audio
 
@@ -129,7 +137,7 @@ Dependencia: D-13 aprobada.
 | Riesgo | Impacto | Mitigación |
 |--------|---------|------------|
 | Cambios entre versiones de Godot | Código que deja de funcionar | Versión fijada en 4.7.2; actualizar solo a propósito y con las pruebas pasando |
-| Rendimiento de la IA en GDScript | Decisiones lentas en dificultad alta | Medir en 4.1; si hace falta, solo el núcleo del muestreo pasa a C# |
+| Rendimiento de la IA en GDScript | Decisiones lentas en dificultad alta | Medido en 4.1: 6 ms de media y menos de 60 ms en difícil. Por ahora no hace falta C# |
 | Tutorial y motor se contradicen | Se enseña una regla incorrecta | Las respuestas las calcula el motor; T-02 compara con los ejemplos del reglamento |
 | Reglas de la flor discutidas entre mesas | Reglas que el jugador siente «mal» | Opciones de reglamento y confirmación del usuario (REGLAS, punto 13) |
 | Señas poco legibles | Mecánica central sin valor | Retratos por capas; pruebas de legibilidad en la Fase 5 |

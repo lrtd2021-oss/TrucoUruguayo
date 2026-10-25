@@ -4,7 +4,7 @@ Videojuego de truco uruguayo para PC, hecho en Godot. Se juega con muestra, piez
 
 ## Estado
 
-**Fase 3 terminada: prototipo jugable.** Ya se puede jugar un partido completo contra la computadora, con cartas provisionales (rectángulos con texto) y una IA básica. Hay 64 pruebas automáticas en verde. La IA definitiva, las señas, el arte, el sonido y el tutorial llegan en las fases siguientes.
+**Fase 4 terminada: IA, personalidades y señas.** Se juega un partido completo contra rivales con personalidad que estiman sus chances sin ver cartas ocultas. El compañero y los rivales se hacen señas, y vos podés hacerle señas a tu compañero. Las cartas siguen siendo provisionales. Hay 79 pruebas automáticas en verde. El arte, el sonido, los menús y el tutorial llegan en las fases siguientes.
 
 | Documento | Contenido |
 |-----------|-----------|
@@ -32,7 +32,10 @@ docs/          documentación del proyecto
 herramientas/  scripts del proyecto (pruebas; generación de recursos desde la Fase 5)
 juego/         proyecto de Godot
   reglas/      motor de reglas: cartas, muestra, tantos, mano, partido, vista
-  ia/          inteligencia artificial (por ahora, la básica provisional y la aleatoria para pruebas)
+  ia/          inteligencia artificial: por muestreo, personalidades, asistente y rivales de referencia
+  senas/       perfiles de señas y registro de quién vio cada una
+  datos/       datos editables (perfil de señas en JSON)
+  mediciones/  medición larga de la fuerza de la IA
   mesa/        escena de la mesa, controlador y cartas provisionales
   pruebas/     pruebas automáticas (GUT)
 ```
@@ -50,6 +53,7 @@ Para jugar, abrí `juego/project.godot` con Godot 4.7.2 y apretá F5, o ejecutá
 - clic en una carta para jugarla, o las teclas 1, 2 y 3;
 - clic en los botones de la derecha para cantar o responder;
 - Enter para pasar a la mano siguiente;
+- S o el botón «Hacer una seña…» para hacerle una seña a tu compañero;
 - P o Esc para pausar.
 
 Para comprobar que los clics llegan con la ventana real:
@@ -58,10 +62,16 @@ Para comprobar que los clics llegan con la ventana real:
 herramientas/probar_clics.sh
 ```
 
+Para medir la fuerza de la IA (1000 partidos, unos 5 minutos):
+
+```bash
+herramientas/medir_ia.sh
+```
+
 Para ejecutar las pruebas sin abrir el editor:
 
 ```bash
 herramientas/pruebas.sh
 ```
 
-El script busca Godot en `~/Herramientas/Godot/4.7.2/`. Si está en otra carpeta, indicá la ruta del ejecutable de consola en la variable `GODOT`. Devuelve 0 si todas las pruebas pasan y 1 si alguna falla. Para ejecutar un solo archivo: `herramientas/pruebas.sh -gselect=test_cantos`.
+El script busca Godot en `~/Herramientas/Godot/4.7.2/`. Si está en otra carpeta, indicá la ruta del ejecutable de consola en la variable `GODOT`. Devuelve 0 si todas las pruebas pasan, y 1 si alguna falla o si algún script tiene errores. Para ejecutar un solo archivo: `herramientas/pruebas.sh -gselect=test_cantos`.

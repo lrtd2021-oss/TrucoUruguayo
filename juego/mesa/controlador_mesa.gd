@@ -15,6 +15,10 @@ signal eventos_aplicados(eventos: Array[Dictionary])
 signal espera_humano(jugador: int)
 signal mano_cerrada
 signal error_guion(mensaje: String)
+## Una seña que la persona del asiento 0 hizo o vio (nunca las que no vio).
+signal sena_vista(sena: Dictionary)
+
+const ASIENTO_PERSONA := 0
 
 var reglamento := Reglamento.new()
 var partido: Partido
@@ -30,6 +34,13 @@ var esperar_presentacion := false
 var automatico := true
 var retardo_ia := 0.7
 var rng_ia := RandomNumberGenerator.new()
+## Personalidad de cada asiento (la de la persona solo se usa para la atención
+## y el disimulo de sus señas). Ver docs/PERSONAJES.md.
+var perfiles: Array[PerfilIA] = []
+var dificultad := PerfilIA.Dificultad.NORMAL
+var perfil_senas := PerfilSenas.cargar()
+var registro := RegistroSenas.new()
+var rng_senas := RandomNumberGenerator.new()
 
 var _espera := 0.0
 var _mano_cerrada := false
@@ -38,6 +49,10 @@ var _mano_cerrada := false
 func iniciar(semilla: int, repartidor := 3) -> void:
 	partido = Partido.new(reglamento, semilla, repartidor)
 	rng_ia.seed = semilla
+	rng_senas.seed = semilla + 1
+	if perfiles.is_empty():
+		perfiles = [PerfilIA.persona(), PerfilIA.crear("cacho", dificultad),
+			PerfilIA.crear("tito", dificultad), PerfilIA.crear("marta", dificultad)] as Array[PerfilIA]
 	# D-15: si hay una persona en la pareja, ella responde los cantos.
 	var decisor: Array[int] = [-1, -1]
 	for j: int in Mano.JUGADORES:
@@ -49,9 +64,43 @@ func iniciar(semilla: int, repartidor := 3) -> void:
 
 func nueva_mano() -> void:
 	mano = partido.nueva_mano()
+	registro = RegistroSenas.new()
 	_mano_cerrada = false
 	_publicar(mano.historial.duplicate(true))
+	_senas_iniciales()
 	_avisar_si_humano()
+
+
+## Al empezar la mano, mientras todos miran sus cartas, la IA le hace señas a
+## su compañero (desde la mano, en orden de juego).
+func _senas_iniciales() -> void:
+	for k: int in Mano.JUGADORES:
+		var j := (mano.jugador_mano + k) % Mano.JUGADORES
+		if fuentes[j] == Fuente.IA:
+			for sena_id: String in IaMuestreo.elegir_senas(Vista.para(mano, j, registro), perfil_senas):
+				_registrar_sena(j, sena_id)
+
+
+## Seña de la persona. Se puede hacer mientras la mano está en juego y no hay
+## pausa; el compañero la ve siempre y cada rival según su atención.
+func hacer_sena(sena_id: String) -> bool:
+	if mano == null or mano.fase == Mano.Fase.TERMINADA or pausado or fuentes[ASIENTO_PERSONA] != Fuente.HUMANO:
+		return false
+	if perfil_senas.sena(sena_id).is_empty():
+		return false
+	_registrar_sena(ASIENTO_PERSONA, sena_id)
+	return true
+
+
+func _registrar_sena(j: int, sena_id: String) -> void:
+	var atencion: Array[float] = []
+	var disimulo: Array[float] = []
+	for p: PerfilIA in perfiles:
+		atencion.append(p.atencion)
+		disimulo.append(p.disimulo)
+	var s := registro.hacer(j, sena_id, atencion, disimulo, rng_senas)
+	if j == ASIENTO_PERSONA or ASIENTO_PERSONA in s.vieron:
+		sena_vista.emit(s)
 
 
 ## Pasa a la mano siguiente si la actual terminó y el partido sigue.
@@ -86,7 +135,7 @@ func paso() -> bool:
 	var a := actor()
 	match fuentes[a]:
 		Fuente.IA:
-			return _aplicar(IaBasica.decidir(Vista.para(mano, a), rng_ia))
+			return _aplicar(IaMuestreo.decidir(Vista.para(mano, a, registro), perfiles[a], perfil_senas, rng_ia))
 		Fuente.GUION:
 			if guion.is_empty():
 				error_guion.emit("el guion no tiene acciones para el jugador %d" % a)

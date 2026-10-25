@@ -28,6 +28,9 @@ Cada decisión tiene un estado: **adoptada**, **propuesta** (espera revisión) o
 | D-21 | 2026-10-25 | GUT 9.7.1 incluido en el repositorio (`juego/addons/gut/`) | adoptada |
 | D-22 | 2026-10-25 | IA básica provisional para el prototipo, reemplazable en la Fase 4 | adoptada |
 | D-23 | 2026-10-25 | Interfaz del prototipo construida por código, no en el editor | adoptada |
+| D-24 | 2026-10-25 | Observación de señas probabilística e igual para todos, hasta tener retratos | adoptada |
+| D-25 | 2026-10-25 | La IA infiere de los cantos ajenos (restricciones blandas) | adoptada |
+| D-26 | 2026-10-25 | Un error de script hace fallar la batería de pruebas | adoptada |
 
 ## Detalle
 
@@ -71,8 +74,14 @@ Cada decisión tiene un estado: **adoptada**, **propuesta** (espera revisión) o
 
 **D-21. GUT en el repositorio.** Las pruebas tienen que poder ejecutarse con solo clonar el repositorio y tener Godot. GUT es MIT y su licencia viaja en `addons/gut/LICENSE.md`.
 
-**D-22. IA básica provisional.** El prototipo necesitaba rivales que jugaran razonablemente para poder probar la mesa: la IA aleatoria se iba al mazo en la mitad de las manos. `IaBasica` usa solo su vista, declara la flor, quiere el envido según su tanto y mata cuando puede. No tiene estrategia ni personalidad; eso corresponde a la Fase 4, que la reemplaza sin tocar el controlador.
+**D-22. IA básica provisional.** *(Reemplazada en el juego por la IA por muestreo; se conserva como rival de referencia en pruebas y mediciones.)* El prototipo necesitaba rivales que jugaran razonablemente para poder probar la mesa: la IA aleatoria se iba al mazo en la mitad de las manos. `IaBasica` usa solo su vista, declara la flor, quiere el envido según su tanto y mata cuando puede. No tiene estrategia ni personalidad; eso corresponde a la Fase 4, que la reemplaza sin tocar el controlador.
 
 **D-23. Interfaz por código en el prototipo.** Mientras las cartas y la disposición son provisionales, construir la mesa por código permite cambiarla y verificarla con capturas sin depender del editor. Cuando llegue la dirección artística definitiva (Fase 5), las piezas estables (carta, retrato, globo, tanteador) pasan a escenas `.tscn` con un tema global.
+
+**D-24. Observación de señas.** El diseño prevé que la persona vea las señas en los retratos si está atenta. Sin retratos todavía, una seña ajena se ve según una probabilidad, con la misma regla para todos: el compañero siempre; un rival, según su atención por (1 − disimulo de quien la hace). Así nadie tiene ventaja de información. Con los retratos de la Fase 5 se reevalúa.
+
+**D-25. Inferencias de los cantos.** Las mediciones mostraron que la IA quería los retrucos y envidos rivales como si las cartas del rival fueran al azar. Ahora toma lo que sugieren los cantos públicos como restricciones blandas en el muestreo: quien canta envido suele tener 26 o más de tanto y quien sube el truco suele tener cartas fuertes. Contra la IA básica pasó del 58,5 % al 64,5 %. Contra la aleatoria, que canta sin sentido, bajó del 87 % al 86 % en 1000 partidos: es el costo esperable de suponer rivales razonables.
+
+**D-26. Errores de script como fallo.** Se comprobó que GUT devuelve 0 aunque un archivo de pruebas no compile, y en ese caso sus pruebas ni se ejecutan. `herramientas/pruebas.sh` y `herramientas/medir_ia.sh` revisan la salida y fallan ante cualquier error de script. Las ejecuciones registradas de las Fases 2 y 3 se revisaron en su momento en busca de errores y no tenían ninguno.
 
 **D-16. Ir al mazo por pareja.** F2 exige que los dos compañeros abandonen. Para simplificar, en la pareja rival decide el jugador de turno. En la pareja de la persona solo decide la persona, en coherencia con D-15: el compañero IA nunca se va al mazo por su cuenta. La opción individual de «pasar» (F6) queda como variante futura.

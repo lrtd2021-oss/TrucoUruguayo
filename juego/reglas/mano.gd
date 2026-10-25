@@ -232,31 +232,20 @@ func _jugar(j: int, c: int) -> void:
 		_cerrar_baza()
 
 
-## Gana la carta más alta. Si las más altas son iguales y de parejas distintas,
-## es parda; si son de la misma pareja, gana esa pareja (reglamento, 6.1).
 func _cerrar_baza() -> void:
-	var maximo := -1
-	var ganador := -1
-	var parda := false
-	for k: int in JUGADORES:
-		var s := (abre + k) % JUGADORES
-		var p := muestra.poder(mesa[s])
-		if p > maximo:
-			maximo = p
-			ganador = s
-			parda = false
-		elif p == maximo and equipo(s) != equipo(ganador):
-			parda = true
-	var r := PARDA if parda else equipo(ganador)
+	var g := ganador_baza(mesa, abre, muestra)
+	var ganador: int = g.jugador
+	var parda := ganador < 0
+	var r: int = g.resultado
 	resultados.append(r)
 	_evento("baza", {"baza": baza, "resultado": r, "jugador": -1 if parda else ganador})
 	if baza == 0:
 		_cerrar_flor()
 		if fase == Fase.TERMINADA:
 			return
-	var g := _ganador_por_bazas()
-	if g >= 0:
-		_terminar(g)
+	var gm := ganador_por_bazas(resultados, jugador_mano)
+	if gm >= 0:
+		_terminar(gm)
 		return
 	baza += 1
 	if not parda:
@@ -265,9 +254,29 @@ func _cerrar_baza() -> void:
 	mesa.fill(-1)
 
 
+## Gana la carta más alta. Si las más altas son iguales y de parejas distintas,
+## es parda; si son de la misma pareja, gana esa pareja (reglamento, 6.1).
+## cartas: la carta de cada jugador (por asiento). Devuelve {resultado, jugador}:
+## el equipo ganador o PARDA, y quién jugó la carta ganadora (-1 si es parda).
+## Es estática para que la IA simule bazas con la misma regla.
+static func ganador_baza(cartas: Array[int], abre_: int, m: Muestra) -> Dictionary:
+	var maximo := -1
+	var ganador := -1
+	var parda := false
+	for k: int in JUGADORES:
+		var s := (abre_ + k) % JUGADORES
+		var p := m.poder(cartas[s])
+		if p > maximo:
+			maximo = p
+			ganador = s
+			parda = false
+		elif p == maximo and equipo(s) != equipo(ganador):
+			parda = true
+	return {"resultado": PARDA if parda else equipo(ganador), "jugador": -1 if parda else ganador}
+
+
 ## Reglamento, 6.2. Devuelve el equipo ganador o -1 si hay que seguir jugando.
-func _ganador_por_bazas() -> int:
-	var r := resultados
+static func ganador_por_bazas(r: Array[int], mano_: int) -> int:
 	for e: int in 2:
 		if r.count(e) == 2:
 			return e
@@ -278,7 +287,7 @@ func _ganador_por_bazas() -> int:
 			return r[1]
 		if r.size() < 3:
 			return -1
-		return r[2] if r[2] != PARDA else equipo(jugador_mano)
+		return r[2] if r[2] != PARDA else equipo(mano_)
 	if r[1] == PARDA:
 		return r[0]
 	# Una baza para cada pareja: decide la tercera; si es parda, la primera.
@@ -328,8 +337,7 @@ func _responder(j: int, quiero: bool) -> void:
 			if quiero:
 				_resolver_envido()
 			else:
-				var previo := secuencia_envido.slice(0, -1)
-				_anotar(c.equipo(), _valor_envido(previo) if not previo.is_empty() else 1, "envido no querido")
+				_anotar(c.equipo(), valor_envido_rechazado(secuencia_envido, reglamento.valor_falta(puntos)), "envido no querido")
 		TipoCanto.FLOR:
 			flor_apuesta_cerrada = true
 			if quiero:
@@ -382,9 +390,32 @@ func _envite(j: int, tipo: int) -> void:
 
 
 func _valor_envido(s: Array[int]) -> int:
+	return valor_envido(s, reglamento.valor_falta(puntos))
+
+
+## Lo que vale una secuencia de envido querida (reglamento, 7.2). Estática para
+## que la IA calcule lo que arriesga con la misma regla.
+static func valor_envido(s: Array[int], valor_falta: int) -> int:
 	if s.has(Accion.Tipo.FALTA_ENVIDO):
-		return reglamento.valor_falta(puntos)
+		return valor_falta
 	return 2 * s.count(Accion.Tipo.ENVIDO) + 3 * s.count(Accion.Tipo.REAL_ENVIDO)
+
+
+## Lo que se lleva quien cantó el último envite si no se lo quieren.
+static func valor_envido_rechazado(s: Array[int], valor_falta: int) -> int:
+	var previo := s.slice(0, -1)
+	return valor_envido(previo, valor_falta) if not previo.is_empty() else 1
+
+
+## Quién gana una comparación de tantos (envido o flor): el mayor; en empate,
+## el más cercano a la mano. tantos tiene -1 para quien no participa.
+static func ganador_tantos(tantos: Array[int], mano_: int) -> int:
+	var mejor := -1
+	for k: int in JUGADORES:
+		var s := (mano_ + k) % JUGADORES
+		if tantos[s] >= 0 and (mejor < 0 or tantos[s] > tantos[mejor]):
+			mejor = s
+	return mejor
 
 
 ## Se declaran desde la mano: cada uno habla solo si supera al mejor de la

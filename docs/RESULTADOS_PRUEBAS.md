@@ -2,6 +2,47 @@
 
 Registro de las ejecuciones reales de las pruebas automáticas. Una prueba solo cuenta como pasada si figura aquí con su ejecución.
 
+## 2026-10-25: cierre de la Fase 4
+
+- **Comando:** `herramientas/pruebas.sh`.
+- **Resultado:** 9 scripts, **79 pruebas, 79 pasadas**, 18.633 comprobaciones, 46 s, sin errores de script.
+- **Nuevo:**
+  - `test_senas.gd`: R-68 y la observación de señas (frecuencia medida: 0,40 esperado, dentro de ±0,04).
+  - `test_ia.gd`:
+    - acciones siempre legales;
+    - 37 de 40 partidos contra la aleatoria;
+    - decisiones iguales con distintas cartas ocultas;
+    - personalidades;
+    - elección de señas;
+    - lectura de la seña del compañero;
+    - señas no vistas;
+    - asistente (T-10);
+    - señas en el controlador.
+- **Medición de fuerza (`herramientas/medir_ia.sh`, repartos espejados):**
+  - contra la IA aleatoria, **862 de 1000 (86,2 %)**;
+  - contra la IA básica, 129 de 200 (64,5 %);
+  - decisión media de 5 a 6 ms y máxima de 45 ms (nivel normal).
+- **Personalidades** (30 partidos), tasa de truco por oportunidad y faroles de truco:
+
+  | Personaje | Tasa de truco | Faroles |
+  |-----------|---------------|---------|
+  | Tito | 0,55 | 23 |
+  | Cacho | 0,49 | 25 |
+  | Rosario | 0,42 | 11 |
+  | Marta | 0,35 | 6 |
+
+- **Seña del compañero (4.5):**
+  - con «tengo el 2 de la muestra», estimación 1,00 y truco;
+  - con «nada que valga», estimación 0,13 y juega sin gritar.
+- **Clics reales:** «bien» a 1920×1080, 1366×768 y 1280×720.
+- **Capturas:** la seña del compañero en el registro y el menú de señas.
+- **Problemas encontrados y corregidos durante la fase:**
+  - **Agujero en el script de pruebas:** un archivo que no compilaba pasaba sin fallar (D-26). Corregido y comprobado con un archivo roto a propósito.
+  - **Decisiones de flor:** la IA se achicaba cuando le convenía querer. Ahora compara lo que gana y lo que arriesga.
+  - **Desempate de cartas:** entre cartas casi igual de buenas jugaba cualquiera. Ahora juega la más baja.
+  - **Inferencia de cantos:** quería retrucos y envidos rivales como si las cartas fueran al azar (D-25).
+  - **Pruebas mal planteadas:** dos pruebas pedían decisiones fuera de turno o en una situación con envido posible. Se replantearon, y la IA ahora responde «no le toca» en lugar de fallar.
+
 ## 2026-10-25: cierre de la Fase 3
 
 - **Comando:** `herramientas/pruebas.sh`.
