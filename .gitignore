@@ -1,0 +1,14 @@
+# Godot: caché de importación y exportaciones
+.godot/
+export/
+*.zip
+*.exe
+*.pck
+
+# Python
+__pycache__/
+*.pyc
+
+# Sistema
+Thumbs.db
+desktop.ini

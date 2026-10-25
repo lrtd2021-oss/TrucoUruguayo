@@ -1,0 +1,8 @@
+# Finales de línea LF en todo el repositorio (Godot y bash los esperan así)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ogg binary
+*.wav binary
+*.ttf binary
+*.otf binary
